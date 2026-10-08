@@ -1,66 +1,60 @@
-// Claude Conflict – Mehrspieler-Karten (gespiegelt aus einem Viertel bzw. einer Hälfte, daher fair)
+// Claude Conflict – Mehrspieler-Karten (achsensymmetrisch, daher fair; Straßen verbinden alle Orte)
 (function (G) {
-  const SETS = ['1234', 'QWER', 'qwer', 'ZXCV'];
-  function remap(ch, fx, fy) {
-    for (const s of SETS) {
-      const i = s.indexOf(ch);
-      if (i >= 0) return s[i ^ (fx ? 1 : 0) ^ (fy ? 2 : 0)];
-    }
-    return ch;
-  }
-  const flipRow = (r, fx, fy) => r.split('').reverse().map(c => remap(c, fx, fy)).join('');
-  const tagRow = (r, fx, fy) => r.split('').map(c => remap(c, fx, fy)).join('');
-
-  // Viertel (oben links) -> 4 Spieler: TL=0, TR=1, BL=2, BR=3
-  function quad(q) {
-    const top = q.map(r => r + flipRow(r, true, false));
-    const bottom = q.slice().reverse().map(r => tagRow(r, false, true) + flipRow(r, true, true));
-    return top.concat(bottom);
-  }
-  // Linke Hälfte -> 2 Spieler
-  function half(h) { return h.map(r => r + flipRow(r, true, false)); }
-
   const mp = [
     {
       id: 'corners', players: 4, name: { de: 'Vier Ecken', en: 'Four Corners' },
-      rows: quad([
-        '1Q..ff.c..',
-        '.q..f...=.',
-        '..f...mm=.',
-        '.f..=====.',
-        '..m..=.ff.',
-        '.c...=.m..',
-        '..f..=...c',
-      ]),
+      rows: [
+        '1Q..ff=c====c=ff..W2',
+        '=q=======..=======w=',
+        '=.f...mm=..=mm...f.=',
+        '=f......=..=......f=',
+        '==m....f=..=f....m==',
+        '=c.....m=..=m.....c=',
+        '.=f.....=cc=.....f=.',
+        '.=f.....=cc=.....f=.',
+        '=c.....m=..=m.....c=',
+        '==m....f=..=f....m==',
+        '=f......=..=......f=',
+        '=.f...mm=..=mm...f.=',
+        '=e=======..=======r=',
+        '3E..ff=c====c=ff..R4',
+      ],
     },
     {
       id: 'isles', players: 4, name: { de: 'Inselreich', en: 'Isle Realm' },
-      rows: quad([
-        '1QZ.f...mm',
-        '.q..f..f..',
-        '..f....ff.',
-        '.....,,~~b',
-        '.c...,~~~b',
-        '..m..,~~~b',
-        '..m.=bbbbb',
-      ]),
+      rows: [
+        '1QZ.f...mmmm...f.XW2',
+        '.q..f..f....f..f..w.',
+        '.=f....ff..ff....f=.',
+        '.=...,,~~bb~~,,...=.',
+        '.c===,~~~bb~~~,===c.',
+        '.=m==,~~~bb~~~,==m=.',
+        '.=m.=bbbbbbbbbb=.m=.',
+        '.=m.=bbbbbbbbbb=.m=.',
+        '.=m==,~~~bb~~~,==m=.',
+        '.c===,~~~bb~~~,===c.',
+        '.=...,,~~bb~~,,...=.',
+        '.=f....ff..ff....f=.',
+        '.e..f..f....f..f..r.',
+        '3EC.f...mmmm...f.VR4',
+      ],
     },
     {
       id: 'twin', players: 2, name: { de: 'Zwei Reiche', en: 'Twin Realms' },
-      rows: half([
-        '..ff...mm..',
-        '.f..c...m.c',
-        '.....=.ff..',
-        '.q...=....=',
-        '..f==.=.f..',
-        '1Q..f=.mm.=',
-        '.q..f=.mm.=',
-        '..f=====...',
-        '.....=.ff..',
-        '.f..c...m.c',
-        '..ff...mm..',
-        '..f......c.',
-      ]),
+      rows: [
+        '..ff...mm....mm...ff..',
+        '.f==c...m=cc=m...c==f.',
+        '..=.=..ff=..=ff..=.=..',
+        '.q===....=..=....===w.',
+        '.=f.....f=..=f.....f=.',
+        '1Q..f..mm=..=mm..f..W2',
+        '.q==f..mm=..=mm..f==w.',
+        '.=f=.....=..=.....=f=.',
+        '.====..ff=..=ff..====.',
+        '.f.=c==.m=cc=m.==c=.f.',
+        '..ff=.=mm=..=mm=.=ff..',
+        '..f.=====c==c=====.f..',
+      ],
     },
   ];
 
