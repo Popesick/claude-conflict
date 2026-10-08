@@ -72,6 +72,7 @@
     let ts = 40, dpr = 1, W = 0, H = 0;
     let destroyed = false, busy = 0, dirty = true, aiRunning = false, finished = false;
     let mode = 'idle', sel = null, reach = null, undoSnap = null, threat = new Set(), targets = [];
+    let insp = null, inspMove = null, inspAtk = null;
     let hover = null, cursorInfo = null, menuEl = null;
     const vis = {};              // id -> {x,y,dx,dy,flip}
     const hpOv = {};             // id -> HP-Anzeige während einer Animation
@@ -150,6 +151,11 @@
           ctx.setLineDash([ts * 0.12, ts * 0.12]); ctx.beginPath();
           path.forEach((p, i) => (i ? ctx.lineTo(cx(p.x), cy(p.y)) : ctx.moveTo(cx(p.x), cy(p.y)))); ctx.stroke(); ctx.setLineDash([]);
         }
+      }
+      if (mode === 'inspect' && insp) {
+        inspAtk.forEach((k) => { const [x, y] = k.split(',').map(Number); tileRect(x, y, 'rgba(255,60,40,0.34)', 'rgba(255,60,40,0.8)', 1.5); });
+        inspMove.forEach((k) => { const [x, y] = k.split(',').map(Number); tileRect(x, y, 'rgba(255,190,60,0.3)', 'rgba(255,225,130,0.95)', 1.5); });
+        tileRect(insp.x, insp.y, 'rgba(255,255,255,0.18)', '#fff', 3);
       }
       if (mode === 'target') targets.forEach((e) => tileRect(e.x, e.y, 'rgba(255,60,40,0.4)', '#ff3b24', 3));
       if (mode === 'menu' && sel) tileRect(sel.x, sel.y, 'rgba(255,255,255,0.2)', '#fff', 2.5);
@@ -386,7 +392,7 @@
 
     const humanTurn = () => !finished && st.winner == null && !st.players[st.cur].ai && !aiRunning && busy === 0;
 
-    function resetSel() { mode = 'idle'; sel = null; reach = null; undoSnap = null; threat = new Set(); targets = []; closeMenu(); }
+    function resetSel() { mode = 'idle'; insp = inspMove = inspAtk = null; sel = null; reach = null; undoSnap = null; threat = new Set(); targets = []; closeMenu(); }
 
     function selectUnit(u) {
       A.play('select');
@@ -402,6 +408,25 @@
           const [sx, sy] = k.split(',').map(Number);
           const d = Math.abs(e.x - sx) + Math.abs(e.y - sy);
           if (d >= def.range[0] && d <= def.range[1]) { threat.add(e.id); break; }
+        }
+      });
+    }
+
+    function inspectUnit(u) {
+      A.play('select');
+      closeMenu();
+      const def = G.UNITS[u.type];
+      const r = E.reachable(st, u);
+      insp = u; mode = 'inspect'; sel = null; reach = null;
+      inspMove = [...r.stops.keys()];
+      inspAtk = new Set();
+      const origins = def.indirect ? [[u.x, u.y]] : inspMove.map((k) => k.split(',').map(Number));
+      origins.forEach(([ox, oy]) => {
+        for (let y = Math.max(0, oy - def.range[1]); y <= Math.min(st.h - 1, oy + def.range[1]); y++) {
+          for (let x = Math.max(0, ox - def.range[1]); x <= Math.min(st.w - 1, ox + def.range[1]); x++) {
+            const d = Math.abs(x - ox) + Math.abs(y - oy);
+            if (d >= def.range[0] && d <= def.range[1]) inspAtk.add(x + ',' + y);
+          }
         }
       });
     }
@@ -482,7 +507,7 @@
       if (!humanTurn()) return;
       if (mode === 'target') { mode = 'menu'; targets = []; unitMenu(); }
       else if (mode === 'menu' || mode === 'sel') undo();
-      else if (mode === 'build') resetSel();
+      else if (mode === 'build' || mode === 'inspect') resetSel();
     }
 
     function onTile(x, y) {
@@ -491,6 +516,7 @@
       const key = x + ',' + y;
       if (mode === 'idle') {
         if (u && u.owner === st.cur && !u.done) { selectUnit(u); return; }
+        if (u) { inspectUnit(u); return; }
         const tl = E.terr(st, x, y);
         if (!u && tl.builds && st.owner[y][x] === st.cur) { A.play('click'); buildMenu(x, y); }
       } else if (mode === 'sel') {
@@ -498,6 +524,8 @@
         if (reach.stops.has(key)) { doMove(x, y); return; }
         if (u && u.owner === st.cur && !u.done) { selectUnit(u); return; }
         undo();
+        const v = E.unitAt(st, x, y);
+        if (v) inspectUnit(v);
       } else if (mode === 'target') {
         const tg = targets.find((e) => e.x === x && e.y === y);
         if (tg) { const id = sel.id; resetSel(); act({ t: 'attack', id, tid: tg.id }); }
@@ -505,6 +533,10 @@
       } else if (mode === 'build') {
         resetSel();
         onTile(x, y);
+      } else if (mode === 'inspect') {
+        const same = u && u.id === insp.id;
+        resetSel();
+        if (!same) onTile(x, y);
       }
     }
 
