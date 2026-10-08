@@ -96,8 +96,8 @@ select { font: 700 .95rem var(--font); color: var(--ink); background: var(--pape
 .stage { flex: 1; min-height: 0; overflow: auto; display: flex; padding: 4px; background: rgba(0,0,0,.08); }
 .board { box-sizing: content-box; position: relative; margin: auto; flex: none; border: 3px solid var(--ink); border-radius: 6px; box-shadow: 0 6px 0 var(--shadow); line-height: 0; }
 .board canvas { display: block; cursor: pointer; touch-action: manipulation; }
-.info { display: flex; gap: 10px; padding: 6px 10px; background: var(--paper); border-top: 3px solid var(--ink); min-height: 4.6em; font-size: .85rem; line-height: 1.35; }
-.info .card { background: var(--card); border: 2px solid var(--ink); border-radius: 8px; padding: 4px 10px; flex: 1; }
+.info { display: flex; gap: 10px; padding: 6px 10px; background: var(--paper); border-top: 3px solid var(--ink); height: 6.8em; flex: none; overflow: hidden; font-size: .85rem; line-height: 1.35; }
+.info .card { background: var(--card); border: 2px solid var(--ink); border-radius: 8px; padding: 4px 10px; flex: 1; min-width: 0; overflow: hidden; }
 .stars { color: #e0a800; letter-spacing: 1px; }
 
 .amenu { position: absolute; z-index: 10; background: var(--card); border: 3px solid var(--ink); border-radius: 12px; padding: 6px; box-shadow: 0 5px 0 var(--shadow); display: flex; flex-direction: column; gap: 4px; min-width: 9.5em; line-height: 1.2; }
@@ -128,7 +128,8 @@ select { font: 700 .95rem var(--font); color: var(--ink); background: var(--pape
 
 @media (max-width: 560px) {
   .hud-obj { display: none; }
-  .info { flex-direction: column; font-size: .75rem; min-height: 5.2em; }
+  .info { font-size: .7rem; height: 7.4em; gap: 6px; padding: 5px 6px; }
+  .info .card { padding: 3px 6px; }
   .btn.big { min-width: 11em; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }

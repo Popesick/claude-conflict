@@ -24,7 +24,7 @@
     return a;
   }
   function preload(ms) {
-    const names = ['ground_grass', 'ground_sea', 'ground_shoal', 'ground_road', 'units_0', 'units_1', 'units_2', 'units_3', 'objs_n', 'objs_0', 'objs_1', 'objs_2', 'objs_3'];
+    const names = ['ground_grass', 'ground_sea', 'ground_shoal', 'units_0', 'units_1', 'units_2', 'units_3', 'objs_n', 'objs_0', 'objs_1', 'objs_2', 'objs_3'];
     const ps = names.map((n) => { const a = atlas(n); return a.ok || a.bad ? Promise.resolve() : new Promise((r) => { a.addEventListener('load', r); a.addEventListener('error', r); }); });
     return Promise.race([Promise.all(ps), new Promise((r) => setTimeout(r, ms || 4000))]);
   }
@@ -80,20 +80,21 @@
       });
     }
     if (ch === '=') {
-      const horiz = isRoadish(at(tx - 1, ty)) || isRoadish(at(tx + 1, ty));
-      const vert = isRoadish(at(tx, ty - 1)) || isRoadish(at(tx, ty + 1));
-      const ri = atlas('ground_road');
-      if (ri.ok) {
-        const a = 0.2, b = 0.6;
-        if (horiz || !vert) ctx.drawImage(ri, 0, CELL * a, CELL, CELL * b, px, py + s * a, s, s * b);
-        if (vert) { ctx.save(); ctx.translate(px + s / 2, py + s / 2); ctx.rotate(Math.PI / 2); ctx.drawImage(ri, 0, CELL * a, CELL, CELL * b, -s / 2, -s / 2 + s * a, s, s * b); ctx.restore(); }
-        return;
-      }
-      ctx.strokeStyle = '#b79c64'; ctx.lineWidth = Math.max(1, s * 0.05); ctx.setLineDash([s * 0.12, s * 0.1]);
-      ctx.beginPath();
-      if (horiz || !vert) { ctx.moveTo(px, py + s / 2); ctx.lineTo(px + s, py + s / 2); }
-      if (vert) { ctx.moveTo(px + s / 2, py); ctx.lineTo(px + s / 2, py + s); }
-      ctx.stroke(); ctx.setLineDash([]);
+      const arms = [[0, -1], [1, 0], [0, 1], [-1, 0]].filter(([dx, dy]) => isRoadish(at(tx + dx, ty + dy)));
+      if (!arms.length) arms.push([-1, 0], [1, 0]);
+      else if (arms.length === 1) arms.push([-arms[0][0], -arms[0][1]]);
+      const cx = px + s / 2, cy = py + s / 2, w = s * 0.46, o = Math.max(1.5, s * 0.05);
+      const pass = (width, color, r) => {
+        ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width; ctx.lineCap = 'butt';
+        ctx.beginPath(); arms.forEach(([dx, dy]) => { ctx.moveTo(cx, cy); ctx.lineTo(cx + dx * s / 2, cy + dy * s / 2); }); ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.fill();
+      };
+      pass(w + o * 2, '#2a1f14', w / 2 + o);
+      pass(w, '#d9c9a0', w / 2);
+      pass(w * 0.82, '#e8dbb8', w * 0.41);
+      ctx.strokeStyle = 'rgba(120,95,55,0.55)'; ctx.lineWidth = Math.max(1, s * 0.03); ctx.setLineDash([s * 0.1, s * 0.09]);
+      arms.forEach(([dx, dy]) => { ctx.beginPath(); ctx.moveTo(cx + dx * s / 2, cy + dy * s / 2); ctx.lineTo(cx, cy); ctx.stroke(); });
+      ctx.setLineDash([]);
     }
     if (ch === 'b') {
       const horizWater = isWater(at(tx - 1, ty)) || isWater(at(tx + 1, ty)) || at(tx - 1, ty) === '~';
