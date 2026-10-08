@@ -72,7 +72,8 @@
         '1Q.....~~...f...',
       ],
       players: [ME, FOE()],
-      funds: [900, 600],
+      funds: [600, 400],
+      incomeMul: 0.5,
       units: [
         ['trooper', 0, 2, 8], ['trooper', 0, 3, 8], ['buggy', 0, 3, 7],
         ['trooper', 1, 13, 1], ['trooper', 1, 12, 2], ['trooper', 1, 11, 4], ['rocketeer', 1, 13, 2],
@@ -295,7 +296,7 @@
   G.CAMPAIGN = missions.map(m => ({
     id: m.id, title: m.title, intro: m.intro, outro: m.outro,
     map: {
-      id: m.id, rows: m.rows, allowed: m.allowed,
+      id: m.id, rows: m.rows, allowed: m.allowed, incomeMul: m.incomeMul,
       units: m.units.map(u => ({ type: u[0], owner: u[1], x: u[2], y: u[3] })),
     },
     players: m.players.map((p, i) => Object.assign({}, p, { funds: m.funds[i] })),

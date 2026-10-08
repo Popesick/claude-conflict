@@ -44,7 +44,7 @@
       mapId: def.id, w: m.w, h: m.h, tiles: m.tiles, owner: m.owner, cap: m.cap,
       units: [], nextId: 1, players, cur: 0, day: 1,
       objective: cfg.objective || def.objective || { type: 'rout' },
-      allowed: def.allowed || G.UNIT_ORDER.slice(), winner: null, result: null,
+      allowed: def.allowed || G.UNIT_ORDER.slice(), incomeMul: def.incomeMul || 1, winner: null, result: null,
     };
     (def.units || []).forEach(u => addUnit(st, u.type, u.owner, u.x, u.y, false));
     // Erstes Einkommen für den Startspieler entfällt, Tag 1.
@@ -282,6 +282,7 @@
     for (let y = 0; y < st.h; y++) for (let x = 0; x < st.w; x++) {
       if (st.owner[y][x] === n) income += terr(st, x, y).income || 0;
     }
+    income = Math.round(income * st.incomeMul);
     p.funds += income;
     r.events.push({ k: 'turn', player: n, day: st.day, income });
     st.units.forEach(u => {

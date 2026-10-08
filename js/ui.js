@@ -326,7 +326,7 @@
     function incomeOf(pi) {
       let n = 0;
       for (let y = 0; y < st.h; y++) for (let x = 0; x < st.w; x++) if (st.owner[y][x] === pi) n += E.terr(st, x, y).income || 0;
-      return n;
+      return Math.round(n * st.incomeMul);
     }
     function objText() {
       const o = st.objective;
